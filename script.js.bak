@@ -1,0 +1,399 @@
+// Initialize Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDEXAMPLEEXAMPLEEXAMPLE",
+    authDomain: "your-project-id.firebaseapp.com",
+    projectId: "your-project-id",
+    storageBucket: "your-project-id.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:1234567890:web:abc123abc123abc123abc123"
+};
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+const storage = firebase.storage();
+const auth = firebase.auth();
+
+// Auth state observer
+auth.onAuthStateChanged(user => {
+    const authElements = document.querySelectorAll('.auth-only');
+    const unauthElements = document.querySelectorAll('.unauth-only');
+    
+    if (user) {
+        // User is signed in
+        authElements.forEach(el => el.style.display = 'block');
+        unauthElements.forEach(el => el.style.display = 'none');
+        document.getElementById('userEmail').textContent = user.email;
+        loadGallery(); // Refresh gallery with user's images
+    } else {
+        // User is signed out
+        authElements.forEach(el => el.style.display = 'none');
+        unauthElements.forEach(el => el.style.display = 'block');
+    }
+});
+
+// Auth functions
+function handleLogin() {
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+    
+    auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            $('#authModal').modal('hide');
+            document.getElementById('authForm').reset();
+        })
+        .catch(error => {
+            showAlert(error.message, 'danger');
+        });
+}
+
+function handleSignup() {
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+    
+    auth.createUserWithEmailAndPassword(email, password)
+        .then(() => {
+            $('#authModal').modal('hide');
+            document.getElementById('authForm').reset();
+        })
+        .catch(error => {
+            showAlert(error.message, 'danger');
+        });
+}
+
+function logout() {
+    auth.signOut();
+}
+const auth = firebase.auth();
+
+// Auth state observer
+auth.onAuthStateChanged(user => {
+    const authElements = document.querySelectorAll('.auth-only');
+    const unauthElements = document.querySelectorAll('.unauth-only');
+    
+    if (user) {
+        // User is signed in
+        authElements.forEach(el => el.style.display = 'block');
+        unauthElements.forEach(el => el.style.display = 'none');
+        document.getElementById('userEmail').textContent = user.email;
+        loadGallery(); // Refresh gallery with user's images
+    } else {
+        // User is signed out
+        authElements.forEach(el => el.style.display = 'none');
+        unauthElements.forEach(el => el.style.display = 'block');
+    }
+});
+
+// Auth functions
+function handleLogin() {
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+    
+    auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            $('#authModal').modal('hide');
+            document.getElementById('authForm').reset();
+        })
+        .catch(error => {
+            showAlert(error.message, 'danger');
+        });
+}
+
+function handleSignup() {
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+    
+    auth.createUserWithEmailAndPassword(email, password)
+        .then(() => {
+            $('#authModal').modal('hide');
+            document.getElementById('authForm').reset();
+        })
+        .catch(error => {
+            showAlert(error.message, 'danger');
+        });
+}
+
+function logout() {
+    auth.signOut();
+}
+const auth = firebase.auth();
+
+// Auth state observer
+auth.onAuthStateChanged(user => {
+    const authElements = document.querySelectorAll('.auth-only');
+    const unauthElements = document.querySelectorAll('.unauth-only');
+    
+    if (user) {
+        // User is signed in
+        authElements.forEach(el => el.style.display = 'block');
+        unauthElements.forEach(el => el.style.display = 'none');
+        document.getElementById('userEmail').textContent = user.email;
+        loadGallery(); // Refresh gallery with user's images
+    } else {
+        // User is signed out
+        authElements.forEach(el => el.style.display = 'none');
+        unauthElements.forEach(el => el.style.display = 'block');
+    }
+});
+
+// DOM Elements
+const generateForm = document.getElementById('generateForm');
+const textInput = document.getElementById('textInput');
+const genreSelect = document.getElementById('genreSelect');
+const storyModeCheckbox = document.getElementById('storyMode');
+const resultsContainer = document.getElementById('resultsContainer');
+const loadingIndicator = document.getElementById('loadingIndicator');
+const galleryContainer = document.getElementById('galleryContainer');
+const emptyGallery = document.getElementById('emptyGallery');
+const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+let currentImageToDelete = null;
+
+// Form submission handler
+if (generateForm) {
+    generateForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const text = textInput.value.trim();
+        const genre = genreSelect.value;
+        const style = document.querySelector('input[name="style"]:checked').value;
+        const isStoryMode = storyModeCheckbox.checked;
+
+        if (!text) {
+            showAlert('Please enter some text', 'danger');
+            return;
+        }
+
+        // Show loading modal
+        loadingModal.show();
+
+        try {
+            // Call our server endpoint (mock for now)
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text, genre, style, isStoryMode })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Display results
+                displayResults(data.images);
+                
+                // Redirect to results page if not already there
+                if (!window.location.pathname.includes('results.html')) {
+                    window.location.href = 'results.html';
+                }
+            } else {
+                showAlert(data.error || 'Failed to generate images', 'danger');
+            }
+        } catch (error) {
+            console.error('Error generating images:', error);
+            showAlert('Network error. Please try again.', 'danger');
+        } finally {
+            loadingModal.hide();
+        }
+    });
+}
+
+// Display results on results page
+function displayResults(images) {
+    if (!resultsContainer) return;
+    
+    resultsContainer.innerHTML = images.map(image => `
+        <div class="col">
+            <div class="card h-100">
+                <img src="${image.imageUrl}" class="card-img-top gallery-img" alt="${image.prompt}">
+                <div class="card-body">
+                    <p class="card-text tamil-font">${image.prompt}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">${image.genre} • ${image.style}</small>
+                        <div>
+                            <button onclick="downloadImage('${image.imageUrl}', '${image.prompt}')" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button onclick="saveImage('${image.imageUrl}', '${image.prompt}', '${image.genre}', '${image.style}')" class="btn btn-sm btn-outline-success ms-1">
+                                <i class="fas fa-save"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Download image
+function downloadImage(url, prompt) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `image-${prompt.substring(0, 20)}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Save image to Firebase
+async function saveImage(imageUrl, prompt, genre, style) {
+    try {
+        // Upload image to Firebase Storage
+        const storageRef = storage.ref();
+        const imageRef = storageRef.child(`images/${Date.now()}.jpg`);
+        
+        // Fetch the image first
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        
+        // Upload to Firebase
+        await imageRef.put(blob);
+        const downloadUrl = await imageRef.getDownloadURL();
+        
+        // Save metadata to Firestore
+        await db.collection('images').add({
+            imageUrl: downloadUrl,
+            prompt,
+            genre,
+            style,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        showAlert('Image saved to gallery!', 'success');
+    } catch (error) {
+        console.error('Error saving image:', error);
+        showAlert('Failed to save image', 'danger');
+    }
+}
+
+// Load gallery items from Firebase
+async function loadGallery() {
+    try {
+        showLoading(true);
+        
+        const user = auth.currentUser;
+        let query = db.collection('images').orderBy('timestamp', 'desc');
+        
+        if (user) {
+            query = query.where('userId', '==', user.uid);
+        }
+            
+        const querySnapshot = await query.get();
+            
+        if (querySnapshot.empty) {
+            showEmptyGallery(true);
+            return;
+        }
+        
+        galleryContainer.innerHTML = '';
+        
+        querySnapshot.forEach(doc => {
+            const image = doc.data();
+            galleryContainer.innerHTML += `
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="${image.imageUrl}" class="card-img-top gallery-img" alt="${image.prompt}">
+                        <div class="card-body">
+                            <p class="card-text tamil-font">${image.prompt}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">${new Date(image.timestamp?.toDate()).toLocaleString()}</small>
+                                <div>
+                                    <button onclick="downloadImage('${image.imageUrl}', '${image.prompt}')" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button onclick="showDeleteModal('${doc.id}', '${image.imageUrl}')" class="btn btn-sm btn-outline-danger ms-1">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        showGallery(true);
+    } catch (error) {
+        console.error('Error loading gallery:', error);
+        showAlert('Failed to load gallery', 'danger');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Show delete confirmation modal
+function showDeleteModal(docId, imageUrl) {
+    currentImageToDelete = { docId, imageUrl };
+    deleteModal.show();
+}
+
+// Delete image from Firebase
+async function deleteImage() {
+    try {
+        deleteModal.hide();
+        showLoading(true);
+        
+        // Delete from Firestore
+        await db.collection('images').doc(currentImageToDelete.docId).delete();
+        
+        // Delete from Storage
+        const imageRef = storage.refFromURL(currentImageToDelete.imageUrl);
+        await imageRef.delete();
+        
+        showAlert('Image deleted successfully', 'success');
+        loadGallery();
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        showAlert('Failed to delete image', 'danger');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// UI Helper Functions
+function showLoading(show) {
+    if (loadingIndicator) loadingIndicator.classList.toggle('d-none', !show);
+}
+
+function showGallery(show) {
+    if (galleryContainer) galleryContainer.classList.toggle('d-none', !show);
+    if (emptyGallery) emptyGallery.classList.toggle('d-none', show);
+}
+
+function showEmptyGallery(show) {
+    if (emptyGallery) emptyGallery.classList.toggle('d-none', !show);
+    if (galleryContainer) galleryContainer.classList.toggle('d-none', show);
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000);
+}
+
+// Initialize the app
+if (window.location.pathname.includes('gallery.html')) {
+    document.addEventListener('DOMContentLoaded', loadGallery);
+    confirmDeleteBtn.addEventListener('click', deleteImage);
+}
+
+if (window.location.pathname.includes('results.html') && resultsContainer) {
+    // You would typically get these from session storage or URL params
+    const mockImages = [{
+        imageUrl: 'https://via.placeholder.com/400x300',
+        prompt: 'Sample image',
+        genre: 'general',
+        style: 'realistic'
+    }];
+    displayResults(mockImages);
+}
