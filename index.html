@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamil/English Text to Image Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts - Noto Sans Tamil -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .tamil-font {
+            font-family: 'Noto Sans Tamil', sans-serif;
+            font-size: 1.1rem;
+        }
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Text to Image Generator</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">
+                            <i class="fas fa-home me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="gallery.html">
+                            <i class="fas fa-images me-1"></i> Gallery
+                        </a>
+                    </li>
+                    <li class="nav-item unauth-only">
+                        <button class="nav-link btn btn-link" data-bs-toggle="modal" data-bs-target="#authModal">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </button>
+                    </li>
+                    <li class="nav-item auth-only" style="display:none">
+                        <span class="nav-link text-white me-2">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userEmail"></span>
+                        </span>
+                    </li>
+                    <li class="nav-item auth-only" style="display:none">
+                        <button class="nav-link btn btn-link" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Enhanced Auth Modal -->
+    <div class="modal fade" id="authModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-center w-100">Welcome Back!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-5">
+                    <form id="authForm">
+                        <div class="mb-4">
+                            <label for="authEmail" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="authEmail" placeholder="Enter your email" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="authPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="authPassword" placeholder="Enter your password" required minlength="6">
+                            <div class="text-end mt-2">
+                                <a href="#" class="text-decoration-none" onclick="handleForgotPassword()">Forgot password?</a>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100 py-2 mb-3" onclick="handleLogin()">
+                            Sign In
+                        </button>
+                        <div class="text-center mb-4">
+                            <span class="text-muted">or continue with</span>
+                        </div>
+                        <div class="d-flex justify-content-center gap-3 mb-4">
+                            <button type="button" class="btn btn-outline-primary rounded-circle p-2">
+                                <i class="fab fa-google"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-primary rounded-circle p-2">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-primary rounded-circle p-2">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-muted">Don't have an account? 
+                                <a href="#" class="text-decoration-none" onclick="switchToSignup()">Sign up</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Generate Images from Text</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="generateForm">
+                            <div class="mb-3">
+                                <label class="form-label">Choose language</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="language" id="tamil" value="tamil" checked>
+                                    <label class="form-check-label" for="tamil">Tamil</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="language" id="english" value="english">
+                                    <label class="form-check-label" for="english">English</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="textInput" class="form-label">Enter your text (Tamil or English)</label>
+                                <textarea class="form-control tamil-font" id="textInput" rows="4" placeholder="Type your text here..."></textarea>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="genreSelect" class="form-label">Genre</label>
+                                    <select class="form-select" id="genreSelect">
+                                        <option value="general">General</option>
+                                        <option value="tamil-movie">Tamil Movie</option>
+                                        <option value="english-movie">English Movie</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="styleSelect" class="form-label">Image style</label>
+                                    <select class="form-select" id="styleSelect">
+                                        <option value="realistic">Realistic</option>
+                                        <option value="animated">Animated</option>
+                                        <option value="aesthetic">Aesthetic</option>
+                                    </select>
+                                </div>
+                                    <!--<label class="form-label">Image Style</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="style" id="realistic" value="realistic" checked>
+                                        <label class="form-check-label" for="realistic">Realistic</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="style" id="animated" value="animated">
+                                        <label class="form-check-label" for="animated">Animated</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="style" id="aesthetic" value="aesthetic">
+                                        <label class="form-check-label" for="aesthetic">Aesthetic</label>
+                                    </div>
+                                </div>-->
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="storyMode">
+                                <label class="form-check-label" for="storyMode">Enable story mode (generate sequence of images for multiple sentences)</label>
+                            </div>
+
+                            <div id="fileUploadContainer" class="mb-3" style="display: none;">
+                                <label for="storyFile" class="form-label">
+                                    <i class="fas fa-file-upload me-2"></i>Upload text file
+                                </label>
+                                <input type="file" class="form-control" id="storyFile" accept=".txt,.text">
+                                <small class="text-muted">Upload a .txt file containing your story</small>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-image me-2"></i>Generate Images
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+    </div>
+    </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="container my-5" id="resultsSection" style="display:none">
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Generated Images</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="resultsContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center py-4">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5>Generating your images...</h5>
+                    <p class="text-muted">This may take a few moments</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase SDK v9 Modular -->
+    <!-- Firebase Configuration and SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    <script>
+        // Your actual Firebase config from your project settings
+        const firebaseConfig = {
+            apiKey: "YOUR_ACTUAL_API_KEY",
+            authDomain: "YOUR_ACTUAL_AUTH_DOMAIN",
+            projectId: "YOUR_ACTUAL_PROJECT_ID",
+            storageBucket: "YOUR_ACTUAL_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_ACTUAL_SENDER_ID",
+            appId: "YOUR_ACTUAL_APP_ID"
+        };
+        
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        window.auth = firebase.auth();
+        window.db = firebase.firestore();
+        window.storage = firebase.storage();
+    </script>
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html>
